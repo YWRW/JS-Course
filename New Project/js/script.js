@@ -1,23 +1,12 @@
-/* Задания на урок:
-
-1) Удалить все рекламные блоки со страницы (правая часть сайта)
-
-2) Изменить жанр фильма, поменять "комедия" на "драма"
-
-3) Изменить задний фон постера с фильмом на изображение "bg.jpg". Оно лежит в папке img.
-Реализовать только при помощи JS
-
-4) Список фильмов на странице сформировать на основании данных из этого JS файла.
-Отсортировать их по алфавиту 
-
-5) Добавить нумерацию выведенных фильмов */
-
 'use strict';
 
 const promo__adv = document.querySelectorAll('.promo__adv img'),
-      promo__bg = document.querySelector('.promo__bg'),
-      promo__genre = promo__bg.querySelector('.promo__genre'),
-      list = document.querySelector('.promo__interactive-list');
+    promo__bg = document.querySelector('.promo__bg'),
+    promo__genre = promo__bg.querySelector('.promo__genre'),
+    list = document.querySelector('.promo__interactive-list'),
+    addForm = document.querySelector('form.add'),
+    checkbox = addForm.querySelector('[type="checkbox"]'),
+    newInput = addForm.querySelector('.adding__input');
 
 const movieDB = {
     movies: [
@@ -29,35 +18,68 @@ const movieDB = {
     ]
 };
 
-changeGanre();
-removeEnvertisement();
-generateFilmList();
-changeBGImg();
 
-function generateFilmList() {
-    
-    list.innerHTML = "";
-    const sortedMoviesArray = movieDB.movies.sort(); 
+addForm.addEventListener('submit', (event) => {
+    event.preventDefault();
 
-    sortedMoviesArray.forEach((film,i) => {
-        list.innerHTML += `
+    let userInput = newInput.value;
+    const filmArr = movieDB.movies;
+
+    if (userInput) {
+        if (userInput.length > 21) {
+
+            filmArr.push(userInput.slice(0, 21) + '...');
+        } else {
+            filmArr.push(userInput);
+        }
+        if (checkbox.checked == true) {
+            console.log(`Фильм - ${userInput}, добавлен в список любимых!`);
+        }
+
+        generateFilmList(movieDB.movies, list);
+
+        addForm.reset();
+    }
+});
+
+const sortArr = (arr) => {
+    arr.sort();
+};
+
+function generateFilmList(films, parant) {
+
+    parant.innerHTML = "";
+    sortArr(films);
+
+    films.forEach((film, i) => {
+        parant.innerHTML += `
         <li class='promo__interactive-item'>${i+1}. ${film}
             <div class="delete"></div>
         </li>
-        `;               
-    }); 
+        `;
+    });
+
+    document.querySelectorAll('.delete').forEach((btn,i) => {
+        btn.addEventListener('click', () => {
+            btn.parentElement.remove();
+            movieDB.movies.splice(i,1);
+            generateFilmList(films, parant); 
+        });
+    });
+
 }
 
-function changeBGImg() {
-    promo__bg.style.backgroundImage = 'url("img/bg.jpg")';
-}
-
-function changeGanre() {
+const makeChanges = () => {
     promo__genre.textContent = 'ДРАММА';
-}
+    promo__bg.style.backgroundImage = 'url("img/bg.jpg")';
+};
 
-function removeEnvertisement() {
-    promo__adv.forEach((element) => {
+const removeEnvertisement = (arr) => {
+    arr.forEach((element) => {
         element.remove();
     });
-}
+};
+
+makeChanges();
+generateFilmList(movieDB.movies, list);
+removeEnvertisement(promo__adv);
